@@ -22,4 +22,14 @@ public class FileUtil {
 
         return filePath.toString();
     }
+
+    public static void deleteFile(String filePath)
+            throws IOException {
+
+        Path path = Paths.get(filePath);
+
+        if (Files.exists(path)) {
+            Files.delete(path);
+        }
+    }
 }

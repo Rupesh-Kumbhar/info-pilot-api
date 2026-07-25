@@ -1,5 +1,6 @@
 package com.practice.info_pilot_api.controller;
 
+import com.practice.info_pilot_api.dto.DocumentResponse;
 import com.practice.info_pilot_api.dto.UploadResponse;
 import com.practice.info_pilot_api.entity.Document;
 import com.practice.info_pilot_api.repository.DocumentRepository;
@@ -17,13 +18,9 @@ public class DocumentController {
     @Autowired
     private DocumentService documentService;
 
-    @Autowired
-    private DocumentRepository documentRepository;
-
-
-    @GetMapping("/all")
-    public List<Document> getAllDocuments() {
-        return documentRepository.findAll();
+    @GetMapping
+    public List<DocumentResponse> getAllDocuments() {
+        return documentService.getAllDocuments();
     }
 
     @PostMapping("/upload")
@@ -33,5 +30,11 @@ public class DocumentController {
         System.out.println("Size : "+ file.getSize());
 
         return documentService.uploadDocument(file);
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteDocuments(@PathVariable Long id){
+        documentService.deleteDocumentById(id);
+        return "Document deleted successfully , DocId = " + id;
     }
 }
