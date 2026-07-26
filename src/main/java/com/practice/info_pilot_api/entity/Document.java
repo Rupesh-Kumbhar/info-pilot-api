@@ -19,6 +19,9 @@ public class Document {
 
     private LocalDateTime uploadedAt;
 
+    @Column(columnDefinition = "CLOB")
+    private String extractedText;
+
     public Document() {
     }
 
@@ -60,5 +63,13 @@ public class Document {
 
     public void setUploadedAt(LocalDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
+    }
+
+    public String getExtractedText() {
+        return extractedText;
+    }
+
+    public void setExtractedText(String extractedText) {
+        this.extractedText = extractedText;
     }
 }

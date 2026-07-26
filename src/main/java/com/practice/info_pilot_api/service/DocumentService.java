@@ -1,4 +1,5 @@
 package com.practice.info_pilot_api.service;
+import com.practice.info_pilot_api.dto.DocumentContentResponse;
 import com.practice.info_pilot_api.dto.DocumentResponse;
 import com.practice.info_pilot_api.dto.UploadResponse;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,4 +11,6 @@ public interface DocumentService {
     List<DocumentResponse> getAllDocuments();
 
     void deleteDocumentById(Long id);
+
+    DocumentContentResponse getDocumentContent(Long id);
 }
