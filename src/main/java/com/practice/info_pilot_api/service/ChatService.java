@@ -1,4 +1,7 @@
 package com.practice.info_pilot_api.service;
 
-public class ChatService {
+public interface ChatService {
+
+    String askQuestion(String question);
+
 }
