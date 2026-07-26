@@ -1,5 +1,6 @@
 package com.practice.info_pilot_api.controller;
 
+import com.practice.info_pilot_api.dto.ChunkResponse;
 import com.practice.info_pilot_api.dto.DocumentContentResponse;
 import com.practice.info_pilot_api.dto.DocumentResponse;
 import com.practice.info_pilot_api.dto.UploadResponse;
@@ -41,11 +42,13 @@ public class DocumentController {
     }
 
     @GetMapping("/{id}/content")
-    public DocumentContentResponse
-    getDocumentContent(
-            @PathVariable Long id) {
+    public DocumentContentResponse getDocumentContent(@PathVariable Long id) {
 
-        return documentService
-                .getDocumentContent(id);
+        return documentService.getDocumentContent(id);
+    }
+
+    @GetMapping("/{id}/chunks")
+    public List<ChunkResponse> getChunks(@PathVariable Long id) {
+        return documentService.getDocumentChunks(id);
     }
 }

@@ -1,7 +1,9 @@
 package com.practice.info_pilot_api.service.impl;
 
+import com.practice.info_pilot_api.dto.ChunkResponse;
 import com.practice.info_pilot_api.dto.DocumentContentResponse;
 import com.practice.info_pilot_api.dto.DocumentResponse;
+import com.practice.info_pilot_api.repository.DocumentChunkRepository;
 import com.practice.info_pilot_api.service.DocumentService;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import com.practice.info_pilot_api.exception.ResourceNotFoundException;
 import com.practice.info_pilot_api.util.PdfUtil;
+import com.practice.info_pilot_api.entity.DocumentChunk;
+import com.practice.info_pilot_api.repository.DocumentChunkRepository;
+import com.practice.info_pilot_api.util.ChunkUtil;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -30,6 +35,9 @@ public class DocumentServiceImpl implements DocumentService {
 
         @Autowired
         private DocumentRepository documentRepository;
+
+        @Autowired
+        private DocumentChunkRepository documentChunkRepository;
 
         @Override
         public UploadResponse uploadDocument(MultipartFile file) {
@@ -73,6 +81,34 @@ public class DocumentServiceImpl implements DocumentService {
                                 documentRepository.save(
                                         document
                                 );
+                        List<String> chunks =
+                                ChunkUtil.createChunks(
+                                        extractedText
+                                );
+
+                        int chunkNumber = 1;
+
+                        for (String chunk : chunks) {
+
+                                DocumentChunk documentChunk =
+                                        new DocumentChunk();
+
+                                documentChunk.setChunkNumber(
+                                        chunkNumber++
+                                );
+
+                                documentChunk.setChunkContent(
+                                        chunk
+                                );
+
+                                documentChunk.setDocument(
+                                        saved
+                                );
+
+                                documentChunkRepository.save(
+                                        documentChunk
+                                );
+                        }
 
                         return new UploadResponse(
                                 saved.getId(),
@@ -122,24 +158,25 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         @Override
-        public DocumentContentResponse
-        getDocumentContent(
-                Long id) {
+        public DocumentContentResponse getDocumentContent(Long id) {
 
-                Document document =
-                        documentRepository
-                                .findById(id)
-                                .orElseThrow(
-                                        () ->
-                                                new ResourceNotFoundException(
-                                                        "Document not found"
-                                                )
-                                );
+                Document document = documentRepository.findById(id).orElseThrow(
+                        () -> new ResourceNotFoundException("Document not found" + " with id : " + id));
 
                 return new DocumentContentResponse(
                         document.getId(),
                         document.getFileName(),
                         document.getExtractedText()
                 );
+        }
+
+        @Override
+        public List<ChunkResponse>
+        getDocumentChunks(Long documentId) {
+
+                return documentChunkRepository.findByDocumentId(documentId)
+                        .stream()
+                        .map(chunk -> new ChunkResponse(chunk.getChunkNumber(),chunk.getChunkContent()))
+                        .toList();
         }
 }
