@@ -1,5 +1,6 @@
 package com.practice.info_pilot_api.controller;
 
+import com.practice.info_pilot_api.dto.DocumentContentResponse;
 import com.practice.info_pilot_api.dto.DocumentResponse;
 import com.practice.info_pilot_api.dto.UploadResponse;
 import com.practice.info_pilot_api.entity.Document;
@@ -37,5 +38,14 @@ public class DocumentController {
     public String deleteDocuments(@PathVariable Long id){
         documentService.deleteDocumentById(id);
         return "Document deleted successfully , DocId = " + id;
+    }
+
+    @GetMapping("/{id}/content")
+    public DocumentContentResponse
+    getDocumentContent(
+            @PathVariable Long id) {
+
+        return documentService
+                .getDocumentContent(id);
     }
 }

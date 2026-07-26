@@ -1,5 +1,6 @@
 package com.practice.info_pilot_api.service.impl;
 
+import com.practice.info_pilot_api.dto.DocumentContentResponse;
 import com.practice.info_pilot_api.dto.DocumentResponse;
 import com.practice.info_pilot_api.service.DocumentService;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.practice.info_pilot_api.exception.ResourceNotFoundException;
+import com.practice.info_pilot_api.util.PdfUtil;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -33,18 +35,57 @@ public class DocumentServiceImpl implements DocumentService {
         public UploadResponse uploadDocument(MultipartFile file) {
 
                 try {
-                        String filePath = FileUtil.saveFile(file,UPLOAD_DIR);
-                        Document document = new Document();
-                        document.setFileName(file.getOriginalFilename());
-                        document.setOriginalFileName(file.getOriginalFilename());
-                        document.setFilePath(filePath);
-                        document.setUploadedAt(LocalDateTime.now());
-                        Document saved = documentRepository.save(document);
 
-                        return new UploadResponse(saved.getId(),saved.getFileName(),"SUCCESS");
+                        String filePath =
+                                FileUtil.saveFile(
+                                        file,
+                                        UPLOAD_DIR
+                                );
+
+                        String extractedText =
+                                PdfUtil.extractText(
+                                        filePath
+                                );
+
+                        Document document = new Document();
+
+                        document.setFileName(
+                                file.getOriginalFilename()
+                        );
+
+                        document.setOriginalFileName(
+                                file.getOriginalFilename()
+                        );
+
+                        document.setFilePath(
+                                filePath
+                        );
+
+                        document.setExtractedText(
+                                extractedText
+                        );
+
+                        document.setUploadedAt(
+                                LocalDateTime.now()
+                        );
+
+                        Document saved =
+                                documentRepository.save(
+                                        document
+                                );
+
+                        return new UploadResponse(
+                                saved.getId(),
+                                saved.getFileName(),
+                                "SUCCESS"
+                        );
 
                 } catch (IOException ex) {
-                        throw new RuntimeException("File upload failed");
+
+                        throw new RuntimeException(
+                                "File upload failed",
+                                ex
+                        );
                 }
         }
 
@@ -78,5 +119,27 @@ public class DocumentServiceImpl implements DocumentService {
                 }
 
                 documentRepository.delete(document);
+        }
+
+        @Override
+        public DocumentContentResponse
+        getDocumentContent(
+                Long id) {
+
+                Document document =
+                        documentRepository
+                                .findById(id)
+                                .orElseThrow(
+                                        () ->
+                                                new ResourceNotFoundException(
+                                                        "Document not found"
+                                                )
+                                );
+
+                return new DocumentContentResponse(
+                        document.getId(),
+                        document.getFileName(),
+                        document.getExtractedText()
+                );
         }
 }
