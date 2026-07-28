@@ -16,4 +16,6 @@ public interface DocumentService {
     DocumentContentResponse getDocumentContent(Long id);
 
     List<ChunkResponse> getDocumentChunks(Long documentId);
+
+    String findRelevantContext(String question);
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface DocumentChunkRepository extends JpaRepository<DocumentChunk, Long> {
 
     List<DocumentChunk> findByDocumentId(Long documentId);
+    List<DocumentChunk> findAll();
 }
