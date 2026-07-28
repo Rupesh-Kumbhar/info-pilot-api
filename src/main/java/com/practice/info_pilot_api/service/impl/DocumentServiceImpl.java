@@ -179,4 +179,30 @@ public class DocumentServiceImpl implements DocumentService {
                         .map(chunk -> new ChunkResponse(chunk.getChunkNumber(),chunk.getChunkContent()))
                         .toList();
         }
+
+        @Override
+        public String findRelevantContext(String question) {
+
+                String lowerQuestion = question.toLowerCase();
+
+                StringBuilder context = new StringBuilder();
+
+                documentChunkRepository.findAll().forEach(chunk -> {
+
+                        String chunkText = chunk.getChunkContent().toLowerCase();
+
+                        boolean match = lowerQuestion.split(" ").length > 0;
+
+                        for (String word : lowerQuestion.split(" ")) {
+
+                                if (chunkText.contains(word)) {
+                                        context.append(chunk.getChunkContent());
+                                        context.append("\n\n");
+                                        break;
+                                }
+                        }
+                });
+
+                return context.toString();
+        }
 }
