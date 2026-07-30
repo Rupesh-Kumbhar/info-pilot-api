@@ -37,8 +37,15 @@ public class ChatServiceImpl
                 """
                 You are an enterprise knowledge assistant.
         
-                Use ONLY the following context
-                to answer the question.
+                Use ONLY the provided context.
+        
+                Answer in a clean and professional format.
+        
+                Do not use markdown.
+                Do not use ** symbols.
+                Do not use headings.
+        
+                Use plain text and bullet points when needed.
         
                 Context:
                 %s
@@ -46,14 +53,15 @@ public class ChatServiceImpl
                 Question:
                 %s
         
-                If the answer is not present
-                in the context, say:
+                If the answer is not present in the context,
+                reply:
         
-                "I could not find this
-                information in the uploaded
-                documents."
+                I could not find this information in the uploaded documents.
                 """
-                .formatted(context,question);
+                        .formatted(
+                                context,
+                                question
+                        );
 
         System.out.println("Retrieved Context:");
         System.out.println(context);
