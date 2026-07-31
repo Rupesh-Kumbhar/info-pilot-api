@@ -1,9 +1,12 @@
 package com.practice.info_pilot_api.controller;
 
+import com.practice.info_pilot_api.dto.ChatHistoryResponse;
 import com.practice.info_pilot_api.dto.ChatRequest;
 import com.practice.info_pilot_api.dto.ChatResponse;
 import com.practice.info_pilot_api.service.ChatService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -32,5 +35,13 @@ public class ChatController {
         return new ChatResponse(
                 answer
         );
+    }
+
+    @GetMapping("/history")
+    public List<ChatHistoryResponse>
+    getHistory() {
+
+        return chatService
+                .getHistory();
     }
 }

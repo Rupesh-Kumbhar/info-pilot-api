@@ -1,23 +1,28 @@
 package com.practice.info_pilot_api.service.impl;
 
+import com.practice.info_pilot_api.dto.ChatHistoryResponse;
+import com.practice.info_pilot_api.entity.ChatMessage;
+import com.practice.info_pilot_api.repository.ChatMessageRepository;
 import com.practice.info_pilot_api.service.ChatService;
 import com.practice.info_pilot_api.service.DocumentService;
 import com.practice.info_pilot_api.service.GeminiService;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
-public class ChatServiceImpl
-        implements ChatService {
+public class ChatServiceImpl implements ChatService {
 
     private final GeminiService geminiService;
     private final DocumentService documentService;
+    private final ChatMessageRepository chatMessageRepository;
 
     public ChatServiceImpl(
             GeminiService geminiService,
-            DocumentService documentService) {
+            DocumentService documentService, ChatMessageRepository chatMessageRepository) {
 
         this.geminiService = geminiService;
         this.documentService = documentService;
+        this.chatMessageRepository = chatMessageRepository;
     }
 
 //    public ChatServiceImpl(
@@ -30,32 +35,24 @@ public class ChatServiceImpl
     public String askQuestion(
             String question) {
 
-        String context =
-                documentService.findRelevantContext(question);
+        String context = documentService.findRelevantContext(question);
+
+        String sourceDocument = documentService.findSourceDocument(question);
 
         String finalPrompt =
                 """
                 You are an enterprise knowledge assistant.
-        
-                Use ONLY the provided context.
-        
-                Answer in a clean and professional format.
-        
-                Do not use markdown.
-                Do not use ** symbols.
-                Do not use headings.
-        
-                Use plain text and bullet points when needed.
-        
+    
+                Use ONLY the context below.
+    
                 Context:
                 %s
-        
+    
                 Question:
                 %s
-        
-                If the answer is not present in the context,
-                reply:
-        
+    
+                If answer not found,
+                say:
                 I could not find this information in the uploaded documents.
                 """
                         .formatted(
@@ -63,8 +60,40 @@ public class ChatServiceImpl
                                 question
                         );
 
-        System.out.println("Retrieved Context:");
-        System.out.println(context);
-        return geminiService.askQuestion(finalPrompt);
+        String answer = geminiService.askQuestion(finalPrompt);
+
+        ChatMessage chatMessage = new ChatMessage();
+
+        chatMessage.setQuestion(question);
+
+        chatMessage.setAnswer(answer);
+
+        chatMessage.setSourceDocument(sourceDocument);
+
+        chatMessage.setAskedAt(java.time.LocalDateTime.now());
+
+        chatMessageRepository.save(chatMessage);
+
+        return answer;
+    }
+
+    @Override
+    public List<ChatHistoryResponse>
+    getHistory() {
+
+        return chatMessageRepository
+                .findAll()
+                .stream()
+                .map(chat ->
+
+                        new ChatHistoryResponse(
+                                chat.getId(),
+                                chat.getQuestion(),
+                                chat.getAnswer(),
+                                chat.getSourceDocument(),
+                                chat.getAskedAt()
+                        )
+                )
+                .toList();
     }
 }

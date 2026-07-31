@@ -205,4 +205,26 @@ public class DocumentServiceImpl implements DocumentService {
 
                 return context.toString();
         }
+
+        @Override
+        public String findSourceDocument(
+                String question) {
+
+                String lowerQuestion = question.toLowerCase();
+
+                for (DocumentChunk chunk : documentChunkRepository.findAll()) {
+
+                        String chunkText = chunk.getChunkContent().toLowerCase();
+
+                        for (String word : lowerQuestion.split(" ")) {
+
+                                if (chunkText.contains(word)) {
+                                        return chunk.getDocument()
+                                                .getOriginalFileName();
+                                }
+                        }
+                }
+
+                return "Unknown";
+        }
 }
