@@ -4,18 +4,18 @@ public class ChatResponse {
 
     private String answer;
 
-    public ChatResponse() {
-    }
+    private String sourceDocument;
 
-    public ChatResponse(String answer) {
+    public ChatResponse (String answer, String sourceDocument) {
         this.answer = answer;
+        this.sourceDocument = sourceDocument;
     }
 
     public String getAnswer() {
         return answer;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public String getSourceDocument() {
+        return sourceDocument;
     }
 }

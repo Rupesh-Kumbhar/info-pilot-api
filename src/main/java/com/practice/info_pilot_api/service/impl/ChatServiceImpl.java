@@ -1,6 +1,7 @@
 package com.practice.info_pilot_api.service.impl;
 
 import com.practice.info_pilot_api.dto.ChatHistoryResponse;
+import com.practice.info_pilot_api.dto.ChatResponse;
 import com.practice.info_pilot_api.entity.ChatMessage;
 import com.practice.info_pilot_api.repository.ChatMessageRepository;
 import com.practice.info_pilot_api.service.ChatService;
@@ -32,7 +33,7 @@ public class ChatServiceImpl implements ChatService {
 //    }
 
     @Override
-    public String askQuestion(
+    public ChatResponse askQuestion(
             String question) {
 
         String context = documentService.findRelevantContext(question);
@@ -74,7 +75,7 @@ public class ChatServiceImpl implements ChatService {
 
         chatMessageRepository.save(chatMessage);
 
-        return answer;
+        return new ChatResponse(answer,sourceDocument);
     }
 
     @Override
