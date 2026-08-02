@@ -13,88 +13,84 @@ import java.util.List;
 @Service
 public class ChatServiceImpl implements ChatService {
 
-    private final GeminiService geminiService;
-    private final DocumentService documentService;
-    private final ChatMessageRepository chatMessageRepository;
+        private final GeminiService geminiService;
+        private final DocumentService documentService;
+        private final ChatMessageRepository chatMessageRepository;
 
-    public ChatServiceImpl(
-            GeminiService geminiService,
-            DocumentService documentService, ChatMessageRepository chatMessageRepository) {
+        public ChatServiceImpl(
+                        GeminiService geminiService,
+                        DocumentService documentService, ChatMessageRepository chatMessageRepository) {
 
-        this.geminiService = geminiService;
-        this.documentService = documentService;
-        this.chatMessageRepository = chatMessageRepository;
-    }
+                this.geminiService = geminiService;
+                this.documentService = documentService;
+                this.chatMessageRepository = chatMessageRepository;
+        }
 
-//    public ChatServiceImpl(
-//            GeminiService geminiService) {
-//
-//        this.geminiService = geminiService;
-//    }
+        // public ChatServiceImpl(
+        // GeminiService geminiService) {
+        //
+        // this.geminiService = geminiService;
+        // }
 
-    @Override
-    public ChatResponse askQuestion(
-            String question) {
+        @Override
+        public ChatResponse askQuestion(
+                        String question,
+                        Long documentId) {
 
-        String context = documentService.findRelevantContext(question);
+                String context = documentService.findRelevantContext(question, documentId);
 
-        String sourceDocument = documentService.findSourceDocument(question);
+                String sourceDocument = documentService.findSourceDocument(documentId);
 
-        String finalPrompt =
-                """
-                You are an enterprise knowledge assistant.
-    
-                Use ONLY the context below.
-    
-                Context:
-                %s
-    
-                Question:
-                %s
-    
-                If answer not found,
-                say:
-                I could not find this information in the uploaded documents.
-                """
-                        .formatted(
-                                context,
-                                question
-                        );
+                String finalPrompt = """
+                                You are an enterprise knowledge assistant.
 
-        String answer = geminiService.askQuestion(finalPrompt);
+                                Use ONLY the context below.
 
-        ChatMessage chatMessage = new ChatMessage();
+                                Context:
+                                %s
 
-        chatMessage.setQuestion(question);
+                                Question:
+                                %s
 
-        chatMessage.setAnswer(answer);
+                                If answer not found,
+                                say:
+                                I could not find this information in the uploaded documents.
+                                """
+                                .formatted(
+                                                context,
+                                                question);
 
-        chatMessage.setSourceDocument(sourceDocument);
+                String answer = geminiService.askQuestion(finalPrompt);
 
-        chatMessage.setAskedAt(java.time.LocalDateTime.now());
+                ChatMessage chatMessage = new ChatMessage();
 
-        chatMessageRepository.save(chatMessage);
+                chatMessage.setQuestion(question);
 
-        return new ChatResponse(answer,sourceDocument);
-    }
+                chatMessage.setAnswer(answer);
 
-    @Override
-    public List<ChatHistoryResponse>
-    getHistory() {
+                chatMessage.setSourceDocument(sourceDocument);
 
-        return chatMessageRepository
-                .findAll()
-                .stream()
-                .map(chat ->
+                chatMessage.setAskedAt(java.time.LocalDateTime.now());
 
-                        new ChatHistoryResponse(
-                                chat.getId(),
-                                chat.getQuestion(),
-                                chat.getAnswer(),
-                                chat.getSourceDocument(),
-                                chat.getAskedAt()
-                        )
-                )
-                .toList();
-    }
+                chatMessageRepository.save(chatMessage);
+
+                return new ChatResponse(answer, sourceDocument);
+        }
+
+        @Override
+        public List<ChatHistoryResponse> getHistory() {
+
+                return chatMessageRepository
+                                .findAll()
+                                .stream()
+                                .map(chat ->
+
+                                new ChatHistoryResponse(
+                                                chat.getId(),
+                                                chat.getQuestion(),
+                                                chat.getAnswer(),
+                                                chat.getSourceDocument(),
+                                                chat.getAskedAt()))
+                                .toList();
+        }
 }

@@ -14,22 +14,30 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class ChatController {
 
-    private final ChatService chatService;
+        private final ChatService chatService;
 
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
-    }
+        public ChatController(
+                        ChatService chatService) {
 
-    @PostMapping("/ask")
-    public ResponseEntity<ChatResponse> askQuestion(
-            @RequestBody ChatRequest request) {
+                this.chatService = chatService;
+        }
 
-        ChatResponse response = chatService.askQuestion(request.getQuestion());
-        return ResponseEntity.ok(response);
-    }
+        @PostMapping("/ask")
+        public ResponseEntity<ChatResponse> askQuestion(
+                        @RequestBody ChatRequest request) {
 
-    @GetMapping("/history")
-    public List<ChatHistoryResponse> getHistory() {
-        return chatService.getHistory();
-    }
+                ChatResponse response = chatService.askQuestion(
+                                request.getQuestion(),
+                                request.getDocumentId());
+
+                return ResponseEntity.ok(
+                                response);
+        }
+
+        @GetMapping("/history")
+        public List<ChatHistoryResponse> getHistory() {
+
+                return chatService
+                                .getHistory();
+        }
 }
