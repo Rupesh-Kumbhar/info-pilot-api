@@ -1,9 +1,6 @@
 package com.practice.info_pilot_api.controller;
 
-import com.practice.info_pilot_api.dto.ChunkResponse;
-import com.practice.info_pilot_api.dto.DocumentContentResponse;
-import com.practice.info_pilot_api.dto.DocumentResponse;
-import com.practice.info_pilot_api.dto.UploadResponse;
+import com.practice.info_pilot_api.dto.*;
 import com.practice.info_pilot_api.entity.Document;
 import com.practice.info_pilot_api.repository.DocumentRepository;
 import com.practice.info_pilot_api.service.DocumentService;
@@ -27,16 +24,16 @@ public class DocumentController {
     }
 
     @PostMapping("/upload")
-    public UploadResponse uploadDocument( @RequestParam("file") MultipartFile file) {
+    public UploadResponse uploadDocument(@RequestParam("file") MultipartFile file) {
 
         System.out.println("Received File : " + file.getOriginalFilename());
-        System.out.println("Size : "+ file.getSize());
+        System.out.println("Size : " + file.getSize());
 
         return documentService.uploadDocument(file);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteDocuments(@PathVariable Long id){
+    public String deleteDocuments(@PathVariable Long id) {
         documentService.deleteDocumentById(id);
         return "Document deleted successfully , DocId = " + id;
     }
@@ -50,5 +47,10 @@ public class DocumentController {
     @GetMapping("/{id}/chunks")
     public List<ChunkResponse> getChunks(@PathVariable Long id) {
         return documentService.getDocumentChunks(id);
+    }
+
+    @GetMapping("/dropdown")
+    public List<DocumentDropdownResponse> getDocuments() {
+        return documentService.getDocumentsForDropdown();
     }
 }

@@ -1,8 +1,6 @@
 package com.practice.info_pilot_api.service.impl;
 
-import com.practice.info_pilot_api.dto.ChunkResponse;
-import com.practice.info_pilot_api.dto.DocumentContentResponse;
-import com.practice.info_pilot_api.dto.DocumentResponse;
+import com.practice.info_pilot_api.dto.*;
 import com.practice.info_pilot_api.repository.DocumentChunkRepository;
 import com.practice.info_pilot_api.service.DocumentService;
 import org.springframework.stereotype.Service;
@@ -13,7 +11,6 @@ Extract Text
 Call Gemini
  */
 
-import com.practice.info_pilot_api.dto.UploadResponse;
 import com.practice.info_pilot_api.entity.Document;
 import com.practice.info_pilot_api.repository.DocumentRepository;
 import com.practice.info_pilot_api.util.FileUtil;
@@ -44,84 +41,64 @@ public class DocumentServiceImpl implements DocumentService {
 
                 try {
 
-                        String filePath =
-                                FileUtil.saveFile(
+                        String filePath = FileUtil.saveFile(
                                         file,
-                                        UPLOAD_DIR
-                                );
+                                        UPLOAD_DIR);
 
-                        String extractedText =
-                                PdfUtil.extractText(
-                                        filePath
-                                );
+                        String extractedText = PdfUtil.extractText(
+                                        filePath);
 
                         Document document = new Document();
 
                         document.setFileName(
-                                file.getOriginalFilename()
-                        );
+                                        file.getOriginalFilename());
 
                         document.setOriginalFileName(
-                                file.getOriginalFilename()
-                        );
+                                        file.getOriginalFilename());
 
                         document.setFilePath(
-                                filePath
-                        );
+                                        filePath);
 
                         document.setExtractedText(
-                                extractedText
-                        );
+                                        extractedText);
 
                         document.setUploadedAt(
-                                LocalDateTime.now()
-                        );
+                                        LocalDateTime.now());
 
-                        Document saved =
-                                documentRepository.save(
-                                        document
-                                );
-                        List<String> chunks =
-                                ChunkUtil.createChunks(
-                                        extractedText
-                                );
+                        Document saved = documentRepository.save(
+                                        document);
+                        List<String> chunks = ChunkUtil.createChunks(
+                                        extractedText);
 
                         int chunkNumber = 1;
 
                         for (String chunk : chunks) {
 
-                                DocumentChunk documentChunk =
-                                        new DocumentChunk();
+                                DocumentChunk documentChunk = new DocumentChunk();
 
                                 documentChunk.setChunkNumber(
-                                        chunkNumber++
-                                );
+                                                chunkNumber++);
 
                                 documentChunk.setChunkContent(
-                                        chunk
-                                );
+                                                chunk);
 
                                 documentChunk.setDocument(
-                                        saved
-                                );
+                                                saved);
 
                                 documentChunkRepository.save(
-                                        documentChunk
-                                );
+                                                documentChunk);
                         }
 
                         return new UploadResponse(
-                                saved.getId(),
-                                saved.getFileName(),
-                                "SUCCESS"
-                        );
+                                        saved.getId(),
+                                        saved.getFileName(),
+                                        "SUCCESS");
 
                 } catch (IOException ex) {
 
                         throw new RuntimeException(
-                                "File upload failed",
-                                ex
-                        );
+                                        "File upload failed",
+                                        ex);
                 }
         }
 
@@ -129,29 +106,26 @@ public class DocumentServiceImpl implements DocumentService {
         public List<DocumentResponse> getAllDocuments() {
 
                 return documentRepository
-                        .findAll()
-                        .stream()
-                        .map(document ->
-                                new DocumentResponse(
-                                        document.getId(),
-                                        document.getFileName()
-                                ))
-                        .toList();
+                                .findAll()
+                                .stream()
+                                .map(document -> new DocumentResponse(
+                                                document.getId(),
+                                                document.getFileName()))
+                                .toList();
         }
 
         @Override
         public void deleteDocumentById(Long id) {
 
                 Document document = documentRepository.findById(id)
-                                .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                "Document not found with id : " + id));
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Document not found with id : " + id));
 
                 try {
                         FileUtil.deleteFile(document.getFilePath());
                 } catch (IOException ex) {
 
-                        throw new RuntimeException("Unable to delete file",ex);
+                        throw new RuntimeException("Unable to delete file", ex);
                 }
 
                 documentRepository.delete(document);
@@ -161,70 +135,76 @@ public class DocumentServiceImpl implements DocumentService {
         public DocumentContentResponse getDocumentContent(Long id) {
 
                 Document document = documentRepository.findById(id).orElseThrow(
-                        () -> new ResourceNotFoundException("Document not found" + " with id : " + id));
+                                () -> new ResourceNotFoundException("Document not found" + " with id : " + id));
 
                 return new DocumentContentResponse(
-                        document.getId(),
-                        document.getFileName(),
-                        document.getExtractedText()
-                );
+                                document.getId(),
+                                document.getFileName(),
+                                document.getExtractedText());
         }
 
         @Override
-        public List<ChunkResponse>
-        getDocumentChunks(Long documentId) {
+        public List<ChunkResponse> getDocumentChunks(Long documentId) {
 
                 return documentChunkRepository.findByDocumentId(documentId)
-                        .stream()
-                        .map(chunk -> new ChunkResponse(chunk.getChunkNumber(),chunk.getChunkContent()))
-                        .toList();
+                                .stream()
+                                .map(chunk -> new ChunkResponse(chunk.getChunkNumber(), chunk.getChunkContent()))
+                                .toList();
         }
 
         @Override
-        public String findRelevantContext(String question) {
+        public String findRelevantContext(
+                        String question,
+                        Long documentId) {
 
                 String lowerQuestion = question.toLowerCase();
 
                 StringBuilder context = new StringBuilder();
 
-                documentChunkRepository.findAll().forEach(chunk -> {
+                documentChunkRepository
+                                .findByDocumentId(documentId)
+                                .forEach(chunk -> {
 
-                        String chunkText = chunk.getChunkContent().toLowerCase();
+                                        String chunkText = chunk.getChunkContent()
+                                                        .toLowerCase();
 
-                        boolean match = lowerQuestion.split(" ").length > 0;
+                                        for (String word : lowerQuestion.split(" ")) {
 
-                        for (String word : lowerQuestion.split(" ")) {
+                                                if (chunkText.contains(word)) {
 
-                                if (chunkText.contains(word)) {
-                                        context.append(chunk.getChunkContent());
-                                        context.append("\n\n");
-                                        break;
-                                }
-                        }
-                });
+                                                        context.append(
+                                                                        chunk.getChunkContent());
+
+                                                        context.append("\n\n");
+
+                                                        break;
+                                                }
+                                        }
+                                });
 
                 return context.toString();
         }
 
         @Override
         public String findSourceDocument(
-                String question) {
+                        Long documentId) {
 
-                String lowerQuestion = question.toLowerCase();
-
-                for (DocumentChunk chunk : documentChunkRepository.findAll()) {
-
-                        String chunkText = chunk.getChunkContent().toLowerCase();
-
-                        for (String word : lowerQuestion.split(" ")) {
-
-                                if (chunkText.contains(word)) {
-                                        return chunk.getDocument()
-                                                .getOriginalFileName();
-                                }
-                        }
-                }
-
-                return "Unknown";
+                return documentRepository
+                                .findById(documentId)
+                                .map(Document::getOriginalFileName)
+                                .orElse("Unknown");
         }
+
+        @Override
+        public List<DocumentDropdownResponse> getDocumentsForDropdown() {
+
+                return documentRepository
+                                .findAll()
+                                .stream()
+                                .map(document -> new DocumentDropdownResponse(
+                                                document.getId(),
+                                                document.getOriginalFileName()))
+                                .toList();
+        }
+
 }
