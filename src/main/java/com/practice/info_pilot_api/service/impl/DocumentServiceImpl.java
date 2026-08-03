@@ -128,6 +128,12 @@ public class DocumentServiceImpl implements DocumentService {
                         throw new RuntimeException("Unable to delete file", ex);
                 }
 
+//                documentRepository.delete(document);
+                documentChunkRepository.deleteAll(
+                        documentChunkRepository
+                                .findByDocumentId(id)
+                );
+
                 documentRepository.delete(document);
         }
 
