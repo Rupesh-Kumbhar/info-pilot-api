@@ -93,4 +93,9 @@ public class ChatServiceImpl implements ChatService {
                                                 chat.getAskedAt()))
                                 .toList();
         }
+
+        @Override
+        public long getTotalQuestions() {
+                return chatMessageRepository.count();
+        }
 }

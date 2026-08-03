@@ -40,4 +40,9 @@ public class ChatController {
                 return chatService
                                 .getHistory();
         }
+
+        @GetMapping("/count")
+        public Long getTotalQuestions() {
+                return chatService.getTotalQuestions();
+        }
 }
