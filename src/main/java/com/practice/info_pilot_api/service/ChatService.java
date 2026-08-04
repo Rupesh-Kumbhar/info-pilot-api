@@ -14,4 +14,6 @@ public interface ChatService {
     List<ChatHistoryResponse> getHistory();
 
     long getTotalQuestions();
+
+    String getLastQuestion();
 }

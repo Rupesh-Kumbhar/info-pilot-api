@@ -98,4 +98,18 @@ public class ChatServiceImpl implements ChatService {
         public long getTotalQuestions() {
                 return chatMessageRepository.count();
         }
+
+        @Override
+        public String getLastQuestion() {
+
+                return chatMessageRepository
+                                .findAll()
+                                .stream()
+                                .reduce(
+                                                (first, second) -> second)
+                                .map(
+                                                ChatMessage::getQuestion)
+                                .orElse(
+                                                "No questions yet");
+        }
 }
