@@ -45,4 +45,10 @@ public class ChatController {
         public Long getTotalQuestions() {
                 return chatService.getTotalQuestions();
         }
+
+        @GetMapping("/latest-question")
+        public String getLastQuestion() {
+
+                return chatService.getLastQuestion();
+        }
 }
