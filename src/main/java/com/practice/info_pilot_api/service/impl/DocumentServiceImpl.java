@@ -3,6 +3,7 @@ package com.practice.info_pilot_api.service.impl;
 import com.practice.info_pilot_api.dto.*;
 import com.practice.info_pilot_api.repository.DocumentChunkRepository;
 import com.practice.info_pilot_api.service.DocumentService;
+import com.practice.info_pilot_api.service.EmbeddingService;
 import org.springframework.stereotype.Service;
 
 /*
@@ -35,6 +36,9 @@ public class DocumentServiceImpl implements DocumentService {
 
         @Autowired
         private DocumentChunkRepository documentChunkRepository;
+
+        @Autowired
+        private EmbeddingService embeddingService;
 
         @Override
         public UploadResponse uploadDocument(MultipartFile file) {
@@ -81,6 +85,15 @@ public class DocumentServiceImpl implements DocumentService {
 
                                 documentChunk.setChunkContent(
                                                 chunk);
+                                String embedding =
+                                        embeddingService
+                                                .generateEmbedding(
+                                                        chunk
+                                                );
+
+                                documentChunk.setEmbedding(
+                                        embedding
+                                );
 
                                 documentChunk.setDocument(
                                                 saved);
