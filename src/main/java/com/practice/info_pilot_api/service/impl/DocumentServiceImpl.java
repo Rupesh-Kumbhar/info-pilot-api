@@ -167,8 +167,13 @@ public class DocumentServiceImpl implements DocumentService {
 
                 return documentChunkRepository.findByDocumentId(documentId)
                                 .stream()
-                                .map(chunk -> new ChunkResponse(chunk.getChunkNumber(), chunk.getChunkContent()))
-                                .toList();
+                        .map(chunk ->
+                                new ChunkResponse(
+                                        chunk.getChunkNumber(),
+                                        chunk.getChunkContent(),
+                                        chunk.getEmbedding()
+                                )
+                        ).toList();
         }
 
         @Override
