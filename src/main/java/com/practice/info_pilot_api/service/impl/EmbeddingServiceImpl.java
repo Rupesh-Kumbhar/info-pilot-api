@@ -20,6 +20,7 @@ public class EmbeddingServiceImpl
          Example:
          [0.241,0.878,0.123...]
         */
+        System.out.println("Embedding generated: "+ text.hashCode());
 
         return String.valueOf(
                 text.hashCode()

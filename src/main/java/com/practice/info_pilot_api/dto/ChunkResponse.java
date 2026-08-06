@@ -4,21 +4,29 @@ public class ChunkResponse {
 
     private Integer chunkNumber;
 
-    private String content;
+    private String chunkContent;
+
+    private String embedding;
 
     public ChunkResponse(
             Integer chunkNumber,
-            String content) {
+            String chunkContent,
+            String embedding) {
 
         this.chunkNumber = chunkNumber;
-        this.content = content;
+        this.chunkContent = chunkContent;
+        this.embedding = embedding;
     }
 
     public Integer getChunkNumber() {
         return chunkNumber;
     }
 
-    public String getContent() {
-        return content;
+    public String getChunkContent() {
+        return chunkContent;
+    }
+
+    public String getEmbedding() {
+        return embedding;
     }
 }
