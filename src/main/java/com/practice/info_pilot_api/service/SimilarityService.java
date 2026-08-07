@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface SimilarityService {
 
-    List<RankedChunkResponse> rankChunks(Long documentId);
+    List<RankedChunkResponse>getTopChunks(Long documentId,Integer topK);
 }

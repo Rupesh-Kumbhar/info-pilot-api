@@ -20,9 +20,9 @@ public class SimilarityController {
     }
 
     @GetMapping("/{documentId}")
-    public List<RankedChunkResponse> rankChunks(
-            @PathVariable Long documentId) {
+    public List<RankedChunkResponse> getTopChunks(
+            @PathVariable Long documentId,@RequestParam(defaultValue = "5") Integer topK) {
 
-        return similarityService.rankChunks(documentId);
+        return similarityService.getTopChunks(documentId,topK);
     }
 }
