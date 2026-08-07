@@ -1,12 +1,12 @@
 package com.practice.info_pilot_api.service.impl;
 
 import com.practice.info_pilot_api.dto.RankedChunkResponse;
-import com.practice.info_pilot_api.entity.DocumentChunk;
 import com.practice.info_pilot_api.repository.DocumentChunkRepository;
 import com.practice.info_pilot_api.service.SimilarityService;
 import com.practice.info_pilot_api.util.SimilarityUtil;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -21,7 +21,7 @@ public class SimilarityServiceImpl
         }
 
         @Override
-        public List<RankedChunkResponse> rankChunks(Long documentId) {
+        public List<RankedChunkResponse> getTopChunks(Long documentId,Integer topK) {
 
                 double[] questionVector = {
                                 1.0,
@@ -40,10 +40,18 @@ public class SimilarityServiceImpl
                                                         3.0
                                         };
 
-                                        double score = SimilarityUtil.cosineSimilarity(questionVector,chunkVector);
+                                        double score = SimilarityUtil
+                                                        .cosineSimilarity(
+                                                                        questionVector,
+                                                                        chunkVector);
 
-                                        return new RankedChunkResponse(chunk.getChunkContent(),score);
+                                        return new RankedChunkResponse(
+                                                        chunk.getChunkNumber(),
+                                                        chunk.getChunkContent(),
+                                                        score);
                                 })
+                                .sorted(Comparator.comparing(RankedChunkResponse::getScore).reversed())
+                                .limit(topK)
                                 .toList();
         }
 }
