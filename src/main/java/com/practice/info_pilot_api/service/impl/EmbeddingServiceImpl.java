@@ -5,25 +5,27 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmbeddingServiceImpl
-        implements EmbeddingService {
+                implements EmbeddingService {
 
-    @Override
-    public String generateEmbedding(
-            String text) {
+        @Override
+        public String generateEmbedding(
+                        String text) {
 
-        /*
-         Temporary placeholder.
+                int hash = Math.abs(
+                                text.hashCode());
 
-         Next sprint:
-         Call Gemini Embedding API.
+                double v1 = (hash % 1000) / 1000.0;
 
-         Example:
-         [0.241,0.878,0.123...]
-        */
-        System.out.println("Embedding generated: "+ text.hashCode());
+                double v2 = ((hash / 1000) % 1000)
+                                / 1000.0;
 
-        return String.valueOf(
-                text.hashCode()
-        );
-    }
+                double v3 = ((hash / 1000000) % 1000)
+                                / 1000.0;
+
+                return v1 +
+                                "," +
+                                v2 +
+                                "," +
+                                v3;
+        }
 }
