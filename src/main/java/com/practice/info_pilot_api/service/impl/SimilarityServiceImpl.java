@@ -54,4 +54,19 @@ public class SimilarityServiceImpl
                                 .limit(topK)
                                 .toList();
         }
+
+        @Override
+        public String buildContext(Long documentId,Integer topK) {
+
+        StringBuilder context =new StringBuilder();
+
+        getTopChunks(documentId,topK)
+                .forEach(chunk -> {
+                        context.append(chunk.getChunkContent()
+                );
+                context.append("\n\n");
+        });
+
+        return context.toString();
+        }
 }
