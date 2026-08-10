@@ -40,7 +40,12 @@ public class ChatServiceImpl implements ChatService {
                         String question,
                         Long documentId) {
 
-                String context =similarityService.buildContext(documentId,3);
+                String context =similarityService
+                                        .buildContext(
+                                                question,
+                                                documentId,
+                                                3
+                                        );
 
                 String sourceDocument = documentService.findSourceDocument(documentId);
 

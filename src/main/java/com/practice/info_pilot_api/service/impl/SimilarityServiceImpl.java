@@ -2,6 +2,7 @@ package com.practice.info_pilot_api.service.impl;
 
 import com.practice.info_pilot_api.dto.RankedChunkResponse;
 import com.practice.info_pilot_api.repository.DocumentChunkRepository;
+import com.practice.info_pilot_api.service.EmbeddingService;
 import com.practice.info_pilot_api.service.SimilarityService;
 import com.practice.info_pilot_api.util.EmbeddingParserUtil;
 import com.practice.info_pilot_api.util.SimilarityUtil;
@@ -12,61 +13,99 @@ import java.util.List;
 
 @Service
 public class SimilarityServiceImpl
-                implements SimilarityService {
+        implements SimilarityService {
 
-        private final DocumentChunkRepository documentChunkRepository;
+    private final DocumentChunkRepository documentChunkRepository;
 
-        public SimilarityServiceImpl(DocumentChunkRepository documentChunkRepository) {
+    private final EmbeddingService embeddingService;
 
-                this.documentChunkRepository = documentChunkRepository;
-        }
+    public SimilarityServiceImpl(
+            DocumentChunkRepository documentChunkRepository,
+            EmbeddingService embeddingService) {
 
-        @Override
-        public List<RankedChunkResponse> getTopChunks(Long documentId,Integer topK) {
+        this.documentChunkRepository =
+                documentChunkRepository;
 
-                double[] questionVector = {
-                                1.0,
-                                2.0,
-                                3.0
-                };
+        this.embeddingService =
+                embeddingService;
+    }
 
-                return documentChunkRepository
-                                .findByDocumentId(documentId)
-                                .stream()
-                                .map(chunk -> {
+    @Override
+    public List<RankedChunkResponse>
+    getTopChunks(
+            String question,
+            Long documentId,
+            Integer topK) {
 
-                                    double[] chunkVector =
-                                            EmbeddingParserUtil
-                                                    .parseEmbedding(
-                                                            chunk.getEmbedding()
-                                                    );
-                                        double score = SimilarityUtil
-                                                        .cosineSimilarity(
-                                                                        questionVector,
-                                                                        chunkVector);
+        String questionEmbedding =
+                embeddingService
+                        .generateEmbedding(
+                                question
+                        );
 
-                                        return new RankedChunkResponse(
-                                                        chunk.getChunkNumber(),
-                                                        chunk.getChunkContent(),
-                                                        score);
-                                })
-                                .sorted(Comparator.comparing(RankedChunkResponse::getScore).reversed())
-                                .limit(topK)
-                                .toList();
-        }
+        double[] questionVector =
+                EmbeddingParserUtil
+                        .parseEmbedding(
+                                questionEmbedding
+                        );
 
-        @Override
-        public String buildContext(Long documentId,Integer topK) {
+        return documentChunkRepository
+                .findByDocumentId(documentId)
+                .stream()
+                .map(chunk -> {
 
-        StringBuilder context =new StringBuilder();
+                    double[] chunkVector =
+                            EmbeddingParserUtil
+                                    .parseEmbedding(
+                                            chunk.getEmbedding()
+                                    );
 
-        getTopChunks(documentId,topK)
-                .forEach(chunk -> {
-                        context.append(chunk.getChunkContent()
-                );
-                context.append("\n\n");
+                    double score =
+                            SimilarityUtil
+                                    .cosineSimilarity(
+                                            questionVector,
+                                            chunkVector
+                                    );
+
+                    return new RankedChunkResponse(
+                            chunk.getChunkNumber(),
+                            chunk.getChunkContent(),
+                            score
+                    );
+                })
+                .sorted(
+                        Comparator
+                                .comparing(
+                                        RankedChunkResponse::getScore
+                                )
+                                .reversed()
+                )
+                .limit(topK)
+                .toList();
+    }
+
+    @Override
+    public String buildContext(
+            String question,
+            Long documentId,
+            Integer topK) {
+
+        StringBuilder context =
+                new StringBuilder();
+
+        getTopChunks(
+                question,
+                documentId,
+                topK
+        ).forEach(chunk -> {
+
+            context.append(
+                    chunk.getChunkContent()
+            );
+
+            context.append("\n\n");
         });
 
         return context.toString();
-        }
+    }
 }
