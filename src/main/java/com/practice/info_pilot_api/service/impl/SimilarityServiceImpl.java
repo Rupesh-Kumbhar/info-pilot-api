@@ -13,9 +13,9 @@ import java.util.List;
 
 @Service
 public class SimilarityServiceImpl
-                implements SimilarityService {
+        implements SimilarityService {
 
-        private final DocumentChunkRepository documentChunkRepository;
+    private final DocumentChunkRepository documentChunkRepository;
 
         private final EmbeddingService embeddingService;
 
@@ -40,20 +40,18 @@ public class SimilarityServiceImpl
                                     questionEmbedding
                             );
 
-                return documentChunkRepository
-                                .findByDocumentId(documentId)
-                                .stream()
-                                .map(chunk -> {
+    @Override
+    public List<RankedChunkResponse>
+    getTopChunks(
+            String question,
+            Long documentId,
+            Integer topK) {
 
-                                    double[] chunkVector =
-                                            EmbeddingParserUtil
-                                                    .parseEmbedding(
-                                                            chunk.getEmbedding()
-                                                    );
-                                        double score = SimilarityUtil
-                                                        .cosineSimilarity(
-                                                                        questionVector,
-                                                                        chunkVector);
+        String questionEmbedding =
+                embeddingService
+                        .generateEmbedding(
+                                question
+                        );
 
                                         return new RankedChunkResponse(
                                                         chunk.getChunkNumber(),

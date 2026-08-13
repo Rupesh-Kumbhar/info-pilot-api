@@ -9,6 +9,7 @@ import com.practice.info_pilot_api.service.DocumentService;
 import com.practice.info_pilot_api.service.GeminiService;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import com.practice.info_pilot_api.service.SimilarityService;
 
 @Service
 public class ChatServiceImpl implements ChatService {
@@ -16,6 +17,7 @@ public class ChatServiceImpl implements ChatService {
         private final GeminiService geminiService;
         private final DocumentService documentService;
         private final ChatMessageRepository chatMessageRepository;
+        private final SimilarityService similarityService;
 
         public ChatServiceImpl(
                         GeminiService geminiService,
@@ -24,6 +26,7 @@ public class ChatServiceImpl implements ChatService {
                 this.geminiService = geminiService;
                 this.documentService = documentService;
                 this.chatMessageRepository = chatMessageRepository;
+                this.similarityService = similarityService;
         }
 
         // public ChatServiceImpl(
@@ -37,7 +40,12 @@ public class ChatServiceImpl implements ChatService {
                         String question,
                         Long documentId) {
 
-                String context = documentService.findRelevantContext(question, documentId);
+                String context =similarityService
+                                        .buildContext(
+                                                question,
+                                                documentId,
+                                                3
+                                        );
 
                 String sourceDocument = documentService.findSourceDocument(documentId);
 
