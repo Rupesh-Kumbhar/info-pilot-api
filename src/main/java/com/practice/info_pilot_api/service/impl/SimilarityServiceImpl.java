@@ -2,6 +2,7 @@ package com.practice.info_pilot_api.service.impl;
 
 import com.practice.info_pilot_api.dto.RankedChunkResponse;
 import com.practice.info_pilot_api.repository.DocumentChunkRepository;
+import com.practice.info_pilot_api.service.EmbeddingService;
 import com.practice.info_pilot_api.service.SimilarityService;
 import com.practice.info_pilot_api.util.EmbeddingParserUtil;
 import com.practice.info_pilot_api.util.SimilarityUtil;
@@ -16,19 +17,28 @@ public class SimilarityServiceImpl
 
         private final DocumentChunkRepository documentChunkRepository;
 
-        public SimilarityServiceImpl(DocumentChunkRepository documentChunkRepository) {
+        private final EmbeddingService embeddingService;
+
+        public SimilarityServiceImpl(DocumentChunkRepository documentChunkRepository, EmbeddingService embeddingService) {
 
                 this.documentChunkRepository = documentChunkRepository;
+            this.embeddingService = embeddingService;
         }
 
         @Override
-        public List<RankedChunkResponse> getTopChunks(Long documentId,Integer topK) {
+        public List<RankedChunkResponse> getTopChunks(String question,Long documentId,Integer topK) {
 
-                double[] questionVector = {
-                                1.0,
-                                2.0,
-                                3.0
-                };
+            String questionEmbedding =
+                    embeddingService
+                            .generateEmbedding(
+                                    question
+                            );
+
+            double[] questionVector =
+                    EmbeddingParserUtil
+                            .parseEmbedding(
+                                    questionEmbedding
+                            );
 
                 return documentChunkRepository
                                 .findByDocumentId(documentId)
@@ -53,5 +63,27 @@ public class SimilarityServiceImpl
                                 .sorted(Comparator.comparing(RankedChunkResponse::getScore).reversed())
                                 .limit(topK)
                                 .toList();
+        }
+
+        @Override
+        public String buildContext(
+                        String question,
+                        Long documentId,
+                        Integer topK) {
+
+                StringBuilder context = new StringBuilder();
+
+                getTopChunks(
+                                question,
+                                documentId,
+                                topK).forEach(chunk -> {
+
+                                        context.append(
+                                                        chunk.getChunkContent());
+
+                                        context.append("\n\n");
+                                });
+
+                return context.toString();
         }
 }
