@@ -17,18 +17,28 @@ public class SimilarityServiceImpl
 
     private final DocumentChunkRepository documentChunkRepository;
 
-    private final EmbeddingService embeddingService;
+        private final EmbeddingService embeddingService;
 
-    public SimilarityServiceImpl(
-            DocumentChunkRepository documentChunkRepository,
-            EmbeddingService embeddingService) {
+        public SimilarityServiceImpl(DocumentChunkRepository documentChunkRepository, EmbeddingService embeddingService) {
 
-        this.documentChunkRepository =
-                documentChunkRepository;
+                this.documentChunkRepository = documentChunkRepository;
+            this.embeddingService = embeddingService;
+        }
 
-        this.embeddingService =
-                embeddingService;
-    }
+        @Override
+        public List<RankedChunkResponse> getTopChunks(String question,Long documentId,Integer topK) {
+
+            String questionEmbedding =
+                    embeddingService
+                            .generateEmbedding(
+                                    question
+                            );
+
+            double[] questionVector =
+                    EmbeddingParserUtil
+                            .parseEmbedding(
+                                    questionEmbedding
+                            );
 
     @Override
     public List<RankedChunkResponse>
@@ -43,69 +53,35 @@ public class SimilarityServiceImpl
                                 question
                         );
 
-        double[] questionVector =
-                EmbeddingParserUtil
-                        .parseEmbedding(
-                                questionEmbedding
-                        );
+                                        return new RankedChunkResponse(
+                                                        chunk.getChunkNumber(),
+                                                        chunk.getChunkContent(),
+                                                        score);
+                                })
+                                .sorted(Comparator.comparing(RankedChunkResponse::getScore).reversed())
+                                .limit(topK)
+                                .toList();
+        }
 
-        return documentChunkRepository
-                .findByDocumentId(documentId)
-                .stream()
-                .map(chunk -> {
+        @Override
+        public String buildContext(
+                        String question,
+                        Long documentId,
+                        Integer topK) {
 
-                    double[] chunkVector =
-                            EmbeddingParserUtil
-                                    .parseEmbedding(
-                                            chunk.getEmbedding()
-                                    );
+                StringBuilder context = new StringBuilder();
 
-                    double score =
-                            SimilarityUtil
-                                    .cosineSimilarity(
-                                            questionVector,
-                                            chunkVector
-                                    );
+                getTopChunks(
+                                question,
+                                documentId,
+                                topK).forEach(chunk -> {
 
-                    return new RankedChunkResponse(
-                            chunk.getChunkNumber(),
-                            chunk.getChunkContent(),
-                            score
-                    );
-                })
-                .sorted(
-                        Comparator
-                                .comparing(
-                                        RankedChunkResponse::getScore
-                                )
-                                .reversed()
-                )
-                .limit(topK)
-                .toList();
-    }
+                                        context.append(
+                                                        chunk.getChunkContent());
 
-    @Override
-    public String buildContext(
-            String question,
-            Long documentId,
-            Integer topK) {
+                                        context.append("\n\n");
+                                });
 
-        StringBuilder context =
-                new StringBuilder();
-
-        getTopChunks(
-                question,
-                documentId,
-                topK
-        ).forEach(chunk -> {
-
-            context.append(
-                    chunk.getChunkContent()
-            );
-
-            context.append("\n\n");
-        });
-
-        return context.toString();
-    }
+                return context.toString();
+        }
 }

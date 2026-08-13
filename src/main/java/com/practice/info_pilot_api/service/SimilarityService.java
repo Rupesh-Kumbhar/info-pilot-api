@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface SimilarityService {
 
-    List<RankedChunkResponse>getTopChunks(Long documentId,Integer topK);
+        List<RankedChunkResponse> getTopChunks(String question,Long documentId,Integer topK);
 
-    String buildContext(Long documentId,Integer topK);
+        String buildContext(String question,Long documentId,Integer topK);
 }

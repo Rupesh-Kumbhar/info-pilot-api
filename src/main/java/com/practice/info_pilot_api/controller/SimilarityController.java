@@ -21,8 +21,8 @@ public class SimilarityController {
 
     @GetMapping("/{documentId}")
     public List<RankedChunkResponse> getTopChunks(
-            @PathVariable Long documentId,@RequestParam(defaultValue = "5") Integer topK) {
+            @RequestParam String question,@PathVariable Long documentId,@RequestParam(defaultValue = "5") Integer topK) {
 
-        return similarityService.getTopChunks(documentId,topK);
+        return similarityService.getTopChunks(question,documentId,topK);
     }
 }
