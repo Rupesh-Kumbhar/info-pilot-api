@@ -20,8 +20,9 @@ public class ChatServiceImpl implements ChatService {
         private final SimilarityService similarityService;
 
         public ChatServiceImpl(
-                        GeminiService geminiService,
-                        DocumentService documentService, ChatMessageRepository chatMessageRepository) {
+                GeminiService geminiService,
+                DocumentService documentService, ChatMessageRepository chatMessageRepository,
+                SimilarityService similarityService) {
 
                 this.geminiService = geminiService;
                 this.documentService = documentService;
