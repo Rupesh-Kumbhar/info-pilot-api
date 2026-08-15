@@ -39,10 +39,23 @@ public class SemanticSearchController {
                         3
                 );
 
-        return new SemanticSearchResponse(
-                question,
-                context,
-                chunks
+        SemanticSearchResponse response =
+                new SemanticSearchResponse(
+                        question,
+                        context,
+                        chunks
+                );
+
+        response.setSelectedChunkCount(
+                chunks.size()
         );
+
+        response.setHighestScore(
+                chunks.isEmpty()
+                        ? 0.0
+                        : chunks.get(0).getScore()
+        );
+
+        return response;
     }
 }

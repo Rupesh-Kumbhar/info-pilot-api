@@ -10,6 +10,26 @@ public class SemanticSearchResponse {
 
     private List<RankedChunkResponse> chunks;
 
+    private Integer selectedChunkCount;
+
+    private Double highestScore;
+
+    public Double getHighestScore() {
+        return highestScore;
+    }
+
+    public void setHighestScore(Double highestScore) {
+        this.highestScore = highestScore;
+    }
+
+    public Integer getSelectedChunkCount() {
+        return selectedChunkCount;
+    }
+
+    public void setSelectedChunkCount(Integer selectedChunkCount) {
+        this.selectedChunkCount = selectedChunkCount;
+    }
+
     public SemanticSearchResponse(
             String question,
             String generatedContext,
