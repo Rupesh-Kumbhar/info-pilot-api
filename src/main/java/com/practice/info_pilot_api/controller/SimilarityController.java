@@ -25,4 +25,15 @@ public class SimilarityController {
 
         return similarityService.getTopChunks(question,documentId,topK);
     }
+
+    @GetMapping("/all-documents")
+    public List<RankedChunkResponse> searchAcrossDocuments(
+                    @RequestParam String question,
+                    @RequestParam(defaultValue = "5") Integer topK) {
+
+            return similarityService
+                            .getTopChunksAcrossDocuments(
+                                            question,
+                                            topK);
+    }
 }

@@ -9,4 +9,10 @@ public interface SimilarityService {
         List<RankedChunkResponse> getTopChunks(String question,Long documentId,Integer topK);
 
         String buildContext(String question,Long documentId,Integer topK);
+
+        List<RankedChunkResponse>
+        getTopChunksAcrossDocuments(
+                String question,
+                Integer topK
+        );
 }

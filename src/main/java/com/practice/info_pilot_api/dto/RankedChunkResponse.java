@@ -8,14 +8,18 @@ public class RankedChunkResponse {
 
     private double score;
 
+    private String documentName;
+
     public RankedChunkResponse(
             Integer chunkNumber,
             String chunkContent,
-            double score) {
+            double score,
+            String documentName) {
 
         this.chunkNumber = chunkNumber;
         this.chunkContent = chunkContent;
         this.score = score;
+        this.documentName = documentName;
     }
 
     public Integer getChunkNumber() {
@@ -29,4 +33,9 @@ public class RankedChunkResponse {
     public double getScore() {
         return score;
     }
+
+    public String getDocumentName() {
+        return documentName;
+    }
+
 }
