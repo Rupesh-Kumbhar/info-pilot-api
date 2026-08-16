@@ -51,7 +51,10 @@ public class SimilarityServiceImpl implements SimilarityService {
                     return new RankedChunkResponse(
                             chunk.getChunkNumber(),
                             chunk.getChunkContent(),
-                            score);
+                            score,
+                            chunk.getDocument()
+                                    .getOriginalFileName()
+                    );
                 })
                 .sorted(
                         Comparator.comparing(
@@ -110,5 +113,44 @@ public class SimilarityServiceImpl implements SimilarityService {
         }
 
         return context.toString();
+    }
+
+    @Override
+    public List<RankedChunkResponse> getTopChunksAcrossDocuments(
+                    String question,
+                    Integer topK) {
+
+            String questionEmbedding = embeddingService.generateEmbedding(
+                            question);
+
+            double[] questionVector = EmbeddingParserUtil.parseEmbedding(
+                            questionEmbedding);
+
+            return documentChunkRepository
+                            .findAll()
+                            .stream()
+                            .map(chunk -> {
+
+                                    double[] chunkVector = EmbeddingParserUtil
+                                                    .parseEmbedding(
+                                                                    chunk.getEmbedding());
+
+                                    double score = SimilarityUtil
+                                                    .cosineSimilarity(
+                                                                    questionVector,
+                                                                    chunkVector);
+
+                                    return new RankedChunkResponse(
+                                                    chunk.getChunkNumber(),
+                                                    chunk.getChunkContent(),
+                                                    score,
+                                                    chunk.getDocument()
+                                                                    .getOriginalFileName());
+                            })
+                            .sorted(
+                                            Comparator.comparing(
+                                                            RankedChunkResponse::getScore).reversed())
+                            .limit(topK)
+                            .toList();
     }
 }
