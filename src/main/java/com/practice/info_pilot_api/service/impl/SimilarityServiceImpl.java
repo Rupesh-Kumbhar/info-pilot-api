@@ -153,4 +153,64 @@ public class SimilarityServiceImpl implements SimilarityService {
                             .limit(topK)
                             .toList();
     }
+
+
+    @Override
+    public String buildContextAcrossDocuments(
+            String question,
+            Integer topK) {
+
+        StringBuilder context =
+                new StringBuilder();
+
+        int rank = 1;
+
+        for (RankedChunkResponse chunk :
+                getTopChunksAcrossDocuments(
+                        question,
+                        topK
+                )) {
+
+            context.append(
+                    "Document : "
+            );
+
+            context.append(
+                    chunk.getDocumentName()
+            );
+
+            context.append("\n");
+
+            context.append(
+                    "Rank : "
+            );
+
+            context.append(rank++);
+
+            context.append("\n");
+
+            context.append(
+                    "Score : "
+            );
+
+            context.append(
+                    String.format(
+                            "%.4f",
+                            chunk.getScore()
+                    )
+            );
+
+            context.append("\n\n");
+
+            context.append(
+                    chunk.getChunkContent()
+            );
+
+            context.append(
+                    "\n\n--------------------------------\n\n"
+            );
+        }
+
+        return context.toString();
+    }
 }

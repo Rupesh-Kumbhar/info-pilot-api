@@ -52,6 +52,9 @@ public class DocumentServiceImpl implements DocumentService {
                         String extractedText = PdfUtil.extractText(
                                         filePath);
 
+                        System.out.println("Extracted Text Length = "+ extractedText.length()
+                        );
+
                         Document document = new Document();
 
                         document.setFileName(

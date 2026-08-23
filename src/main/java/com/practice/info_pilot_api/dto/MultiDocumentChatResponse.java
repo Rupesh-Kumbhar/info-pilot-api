@@ -1,0 +1,16 @@
+package com.practice.info_pilot_api.dto;
+
+public class MultiDocumentChatResponse {
+
+    private String answer;
+
+    public MultiDocumentChatResponse(
+            String answer) {
+
+        this.answer = answer;
+    }
+
+    public String getAnswer() {
+        return answer;
+    }
+}

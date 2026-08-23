@@ -15,4 +15,9 @@ public interface SimilarityService {
                 String question,
                 Integer topK
         );
+
+        String buildContextAcrossDocuments(
+                String question,
+                Integer topK
+        );
 }
